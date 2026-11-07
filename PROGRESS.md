@@ -10,8 +10,10 @@
 - [x] 6. Live at https://noir-microburbs.vercel.app (10 of 10 there too); the key is a Vercel secret
 - [x] 7. Chrome extension built in `/extension`; tested on a local copy of a listing page
 
+- [x] 8. Loaded in Chrome and checked on real listings: Domain (1001/2 Sam Sing St, Waterloo) and realestate.com.au (29A Albion St, Surry Hills, showing the exact home, valuation, updated last sale and heritage on the property)
+
 ## Next
-- [ ] 8. Load it in Chrome and fix problems reported from real listings
+- [ ] Holdout score ("final score" with the 10 addresses)
 - [ ] Docs, videos, final check and push (when you say the word for each)
 
 ## Things the data taught us

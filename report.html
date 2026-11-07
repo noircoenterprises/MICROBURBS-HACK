@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Can a listing show what it leaves out? | Noir &amp; Co Enterprises</title>
+<style>
+  :root {
+    --ink: #1a2b4a; --navy: #0b2559; --grey: #5f6f86; --line: #e3e9f2; --soft: #f3f7fe;
+    --blue: #0065f6; --deep: #0047d8; --green: #0b8f5a; --miss: #c27803;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #fff; color: var(--ink);
+    font: 400 17px/1.6 "Avenir Next", Avenir, Montserrat, "Segoe UI", -apple-system, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 780px; margin: 0 auto; padding: 56px 20px 64px; }
+  .eyebrow { margin: 0 0 12px; font-size: 14px; font-weight: 600; color: var(--grey); }
+  h1 { margin: 0 0 18px; font-size: clamp(31px, 6vw, 44px); line-height: 1.14; font-weight: 800; letter-spacing: -.6px; color: var(--navy); }
+  h2 { margin: 52px 0 12px; font-size: 26px; line-height: 1.25; font-weight: 800; color: var(--navy); }
+  h3 { margin: 30px 0 10px; font-size: 18px; font-weight: 700; color: var(--navy); }
+  p { margin: 0 0 14px; }
+  .lead { font-size: 20px; line-height: 1.5; }
+  .lead strong { color: var(--deep); }
+  .big { margin: 28px 0 2px; font-size: clamp(36px, 7vw, 46px); line-height: 1.1; font-weight: 800; letter-spacing: -.5px; color: var(--deep); }
+  .big + p { margin-bottom: 0; }
+  .bar { display: flex; height: 24px; margin: 14px 0 6px; border-radius: 7px; overflow: hidden; }
+  .bar span { display: block; }
+  .bar .right { width: 80%; background: var(--blue); }
+  .bar .wrong { width: 20%; background: #f0c674; }
+  .key { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 14px; color: var(--grey); }
+  .key i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 3px; }
+  .flow { display: flex; align-items: stretch; gap: 10px; margin: 18px 0 20px; }
+  .step { flex: 1 1 0; padding: 12px 14px; background: var(--soft); border: 1px solid var(--line); border-radius: 12px; font-weight: 700; color: var(--navy); line-height: 1.3; }
+  .step small { display: block; margin-top: 4px; font-weight: 400; font-size: 13.5px; color: var(--grey); }
+  .arrow { align-self: center; font-size: 22px; font-weight: 800; color: var(--blue); }
+  .sum { margin: 14px 0 18px; padding: 12px 14px; background: var(--soft); border-radius: 10px; font-size: 15.5px; font-weight: 600; color: var(--navy); overflow-wrap: anywhere; }
+  .scroll { overflow-x: auto; margin: 12px 0 8px; border: 1px solid var(--line); border-radius: 12px; }
+  table { width: 100%; min-width: 660px; border-collapse: collapse; font-size: 14px; line-height: 1.35; }
+  th, td { padding: 9px 11px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+  tr:last-child td { border-bottom: 0; }
+  thead th { background: var(--soft); font-weight: 700; color: var(--navy); }
+  tbody th { font-weight: 600; }
+  td.ours { font-weight: 600; color: var(--deep); background: #f8fbff; }
+  thead th.ours { color: var(--deep); }
+  .note { font-size: 13.5px; color: var(--grey); }
+  ul { margin: 0 0 14px; padding-left: 20px; }
+  li { margin-bottom: 9px; }
+  .closing { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 18px; font-weight: 600; color: var(--navy); }
+  footer { margin-top: 26px; font-size: 13.5px; color: var(--grey); }
+  footer p { margin-bottom: 6px; }
+  a { color: var(--deep); }
+  @media (max-width: 620px) {
+    .flow { flex-direction: column; }
+    .arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Noir &amp; Co Enterprises · Microburbs hackathon, Task 3 · 7 November 2026</p>
+  <h1>Can a listing show what it leaves out, for the exact home?</h1>
+  <p class="lead">Yes: on <strong>8 of 10</strong> untested listings our Chrome extension found the right answer, and it <strong>never showed a wrong home</strong>.</p>
+  <p>It puts Microburbs facts beside listings on realestate.com.au and Domain: the last sale updated to today's prices, daily life in walking minutes, and things to check before you buy. On the other two listings it asked the buyer to pick, with the right record on the list. We have fixed both since.</p>
+
+  <h2>What we found along the way</h2>
+
+  <p class="big">109 vs 34</p>
+  <p>In Microburbs' own test on 227 flat sales, a flat's last sale updated for price changes since came within 10% of the real price 109 times. Their valuation did so 34 times, and it exists for only about 13% of City of Sydney flats. So flats lead with the updated last sale. We used these figures as given and did not rerun that test.</p>
+
+  <p class="big">99.5%</p>
+  <p>That's how many of 200 random homes have heritage within 200 m, so a "nearby" flag told buyers nothing. Only 38.5% have it on the property, so that's when we flag it. The all-clear line went from 0.5% of homes to 30%.</p>
+
+  <p class="big">80 places</p>
+  <p>That's all the nearby-amenities list returns, of any kind. At 2 Sam Sing Street, Waterloo, all 80 were within 372 m and just 1 was a supermarket, though its own count shows 46 within 2 km. So we also read each suburb's full list of places, and now show real supermarket names.</p>
+
+  <p class="big">$14.8M</p>
+  <p>That's the last sale on the only record for 23-47 Flinders Street, Surry Hills. It covers the whole building, so updating it would badly mislead a buyer looking at one flat. Whole-building records show no price, just recent sales nearby.</p>
+
+  <p class="big">12%</p>
+  <p>27 of the 227 random addresses we tried had retired IDs. The address list still holds them, but the API refuses them. Some return under a new name: 534D/810 Elizabeth Street is now 534/810. We check an ID is live before offering it.</p>
+
+  <h3>What does each one show a buyer?</h3>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr><th>Fact</th><th>realestate.com.au</th><th>Domain</th><th>Homer</th><th class="ours">Our panel</th></tr>
+      </thead>
+      <tbody>
+        <tr><th>This home's last sale price</th><td>To confirm</td><td>Year only</td><td>Not mentioned</td><td class="ours">Yes, with its date</td></tr>
+        <tr><th>Last sale updated to today's prices</th><td>To confirm</td><td>No</td><td>Not mentioned</td><td class="ours">Yes</td></tr>
+        <tr><th>Valuation and range</th><td>To confirm</td><td>Not on the listing</td><td>Not mentioned</td><td class="ours">Yes, when one exists</td></tr>
+        <tr><th>Schools</th><td>To confirm</td><td>Catchments and nearby lists, no NAPLAN</td><td>Not mentioned</td><td class="ours">Nearest public primary and high, NAPLAN label, selective label</td></tr>
+        <tr><th>Walking times to rail, bus, supermarket and park</th><td>To confirm</td><td>No</td><td>Not mentioned</td><td class="ours">Yes</td></tr>
+        <tr><th>Flood, heritage and power lines</th><td>To confirm</td><td>No</td><td>Not mentioned</td><td class="ours">Yes</td></tr>
+        <tr><th>Public housing estimate</th><td>To confirm</td><td>No</td><td>Not mentioned</td><td class="ours">Yes, in neutral wording</td></tr>
+        <tr><th>The street's rank on forecast growth</th><td>To confirm</td><td>No</td><td>Not mentioned</td><td class="ours">Yes, when there's data</td></tr>
+        <tr><th>Questions for the agent, based on the flags</th><td>To confirm</td><td>No</td><td>Not mentioned</td><td class="ours">Yes</td></tr>
+        <tr><th>Price guide history and agent pricing patterns</th><td>To confirm</td><td>Current guide only</td><td>Yes, its main focus</td><td class="ours">No</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">Domain: the sections of one listing (103/320 Harris Street, Pyrmont), read on 7 November 2026. realestate.com.au: one listing, looked at by a team member. Homer: its Chrome Web Store description; we did not install it, so "Not mentioned" doesn't prove it's absent.</p>
+
+  <h2>What our separate check showed</h2>
+  <p class="big">8 of 10</p>
+  <p>We ran 10 addresses we had not tested, once, on the live server, with no code changes first. None showed facts for a wrong home.</p>
+  <div class="bar" role="img" aria-label="8 of 10 correct, 2 asked the buyer to pick when they should have matched"><span class="right"></span><span class="wrong"></span></div>
+  <div class="key"><span><i style="background:var(--blue)"></i>8 correct: 7 exact homes, 1 correctly outside our area</span><span><i style="background:#f0c674"></i>2 asked to pick when they should have matched</span></div>
+  <ul style="margin-top:16px">
+    <li><strong>C1109/21 Dunkerley Place, Waterloo:</strong> the data calls this flat 1109, with no letter. It was offered second on the list.</li>
+    <li><strong>120-122 Lawson Street, Redfern:</strong> this is one house, but the address matcher labelled it a unit, so the panel said "Pick your unit".</li>
+  </ul>
+  <p>We fixed both afterwards with general rules. Those 10 addresses are no longer untested, so <strong>8 of 10 stays our score</strong>.</p>
+
+  <h2>What data supported the result?</h2>
+  <p>The Microburbs API was our only data source. It covers about <strong>206,750</strong> home addresses across the City of Sydney's 29 suburbs. For each home the panel uses its address record, basics, sale history, valuation, risk layers, schools, transport, nearby places, street profile, nearby sales and its suburb's median price history.</p>
+  <p>Addresses come from Open G-NAF. We used neither of the supplied CSV files. Caches stay in memory, and the repo holds no API responses. From listing pages we read only the address.</p>
+
+  <h2>How did we build it?</h2>
+  <div class="flow" role="img" aria-label="The address on the listing goes to our server, which matches one home and fetches its facts from Microburbs, then the panel shows them beside the listing">
+    <div class="step">Address on the listing<small>Only the address is read</small></div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="step">Our server<small>Matches one home, or asks</small></div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="step">Microburbs API<small>Facts for that home</small></div>
+    <div class="arrow" aria-hidden="true">→</div>
+    <div class="step">Panel<small>Beside the listing</small></div>
+  </div>
+  <p><strong>Matching comes first.</strong> "Exact" needs the unit, street number, street and suburb all to agree. Anything less becomes a list to pick from, or a box to type in.</p>
+  <p><strong>The price is our clever step.</strong> It takes the home's own last sale and moves it by how much its suburb's median has moved since:</p>
+  <p class="sum">updated value = sale price × (latest suburb median ÷ suburb median nearest the sale date)</p>
+  <p>For houses, and for sales over 10 years old, the valuation goes first when one exists. The server keeps the API key, and the extension never sees it.</p>
+
+  <h2>How did we check it?</h2>
+  <ul>
+    <li><strong>10 development addresses</strong> guided the matching, and all now behave as expected. We changed one expected result, for 214/219-231 Botany Road, because the data has that building but no unit 214.</li>
+    <li><strong>10 holdout addresses</strong> ran once, and we checked each result against the API's full address list. Answers took 0.4 to 1.6 seconds.</li>
+    <li><strong>Real listings in Chrome</strong> worked on both sites: 1001/2 Sam Sing Street on Domain, and 29A Albion Street on realestate.com.au.</li>
+    <li><strong>200 random homes</strong> gave the flag rates, using a fixed seed. Each percentage could be off by up to about 7 points.</li>
+  </ul>
+  <div class="scroll">
+    <table style="min-width:440px">
+      <thead><tr><th>Flag, across 200 homes</th><th>On the property</th><th>Within 200 m</th></tr></thead>
+      <tbody>
+        <tr><th>Flood</th><td>1.0%</td><td>3.5%</td></tr>
+        <tr><th>Past flooding</th><td>0.0%</td><td>0.0%</td></tr>
+        <tr><th>Heritage</th><td>38.5%</td><td>99.5%</td></tr>
+        <tr><th>High-voltage power lines</th><td>0.0%</td><td>42.5%</td></tr>
+        <tr><th>Public housing (estimated)</th><td>12.0%</td><td>56.0%</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="note">"Within 200 m" includes homes with the flag on the property.</p>
+
+  <h2>What remains uncertain?</h2>
+  <ul>
+    <li><strong>New Metro stations aren't in the data yet.</strong> We found no Waterloo, Barangaroo or Gadigal station. Light rail is mixed in with trains, so the panel's row reads "Rail" and carries a small note.</li>
+    <li><strong>Walking times are straight lines</strong> at 80 m a minute. They can cross water, such as Pyrmont to Balmain.</li>
+    <li><strong>Public housing is an estimate</strong> for the small area around a home, not a fact about the home.</li>
+    <li><strong>Price changes are at suburb level,</strong> not for one building. An old sale can land far from today's market: 120-122 Lawson Street comes out at about $2.94M, against an $8M asking price in the data. Sales over 10 years old are marked rough.</li>
+    <li><strong>Coverage is thin for flats.</strong> Of the 7 flats in our holdout, 1 had a valuation and 3 had a sale to update. The others show similar nearby sales instead.</li>
+    <li><strong>Dropping a unit's letter is an inference.</strong> We treat C1109 as 1109 only when no unit in the building has a letter and exactly one flat has those digits. The panel says so.</li>
+    <li><strong>Some labels are rough.</strong> A home with no unit and no type in the data is treated as a flat. "Grocery" covers any shop filed under supermarket without a chain name. Selective schools come from our own short list, under one label, so check each school's entry rules.</li>
+    <li><strong>Nearby shops and parks can be missed</strong> just over a suburb boundary, because the full list of places is per suburb.</li>
+    <li><strong>These are small samples.</strong> Ten holdout listings can't prove a rate. We also have not rerun the 200-home sample to confirm it repeats exactly.</li>
+  </ul>
+
+  <p class="closing">The separate check matched 8 of 10 untested listings, and none showed a wrong home.</p>
+
+  <footer>
+    <p>Data © Microburbs. Addresses from Open G-NAF, © Geoscape Australia.</p>
+    <p>Server based on <a href="https://github.com/Microburbs/microburbs-hackathon-demos">microburbs-hackathon-demos</a> (MIT licence).</p>
+  </footer>
+</main>
+</body>
+</html>

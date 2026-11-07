@@ -69,18 +69,36 @@ class Microburbs:
         if hit and time.monotonic() - hit[0] < CACHE_TTL_SECONDS:
             return hit[1]
 
-        resp = self.session.get(f"{self.base_url}{path}", params=params or None, timeout=self.timeout)
-        if resp.status_code == 403:
-            raise OutsideAreaError(_detail(resp))
-        if not resp.ok:
-            raise ApiError(f"{resp.status_code}: {_detail(resp)}")
-        body = resp.json()
-        result = Result(data=body.get("data"), message=body.get("message"))
+        result = self.fetch(path, **params)
         with self._lock:
             if len(self._cache) > 5000:  # crude bound on memory; fine for a demo
                 self._cache.clear()
             self._cache[key] = (time.monotonic(), result)
         return result
+
+    def fetch(self, path: str, **params: Any) -> Result:
+        """One API call with no cache. Waits and retries when rate limited (HTTP 429)."""
+        for attempt in range(4):
+            try:
+                resp = self.session.get(f"{self.base_url}{path}", params=params or None, timeout=self.timeout)
+            except requests.RequestException as e:
+                raise ApiError(f"network problem: {type(e).__name__}") from e
+            if resp.status_code != 429:
+                break
+            try:
+                wait = float(resp.headers.get("Retry-After", ""))
+            except ValueError:
+                wait = 0.5 * (attempt + 1)
+            time.sleep(min(wait, 3))
+        if resp.status_code == 403:
+            raise OutsideAreaError(_detail(resp))
+        if not resp.ok:
+            raise ApiError(f"{resp.status_code}: {_detail(resp)}")
+        try:
+            body = resp.json()
+        except ValueError as e:
+            raise ApiError("the API sent something that wasn't JSON") from e
+        return Result(data=body.get("data"), message=body.get("message"))
 
     # --- Lookups -----------------------------------------------------------
 

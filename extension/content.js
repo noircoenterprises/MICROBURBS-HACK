@@ -332,7 +332,7 @@
     } else {
       const shown = flags.filter((f) => f.applies);
       const hazards = shown.filter((f) => f.key !== "public_housing");
-      body = (hazards.length ? "" : `<div class="clear">No flood, heritage or power-line issues nearby ✓</div>`)
+      body = (hazards.length ? "" : `<div class="clear">No flood or power-line issues nearby, no heritage listing on this property ✓</div>`)
         + shown.map((f) => `<div class="flag">
             <span class="dot ${esc(f.level)}"></span><span class="what">${esc(f.label)}</span><span class="said ${esc(f.level)}">${esc(f.text)}</span>
           </div>`).join("");

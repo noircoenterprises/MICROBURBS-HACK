@@ -819,6 +819,9 @@ REPORT_CALLS = {
     "street/profile": {},
 }
 
+NEAR_M = 200  # a flag counts as nearby under this distance
+NONE_NEARBY = "None within 1 km"
+
 FLAGS = {
     "flood": "Flood",
     "historical_flood": "Past flooding",
@@ -826,6 +829,25 @@ FLAGS = {
     "hv_power_line": "High-voltage power lines",
     "public_housing": "Public housing (estimated)",
 }
+
+
+# Fully selective public high schools that can appear within 5 km of the City of Sydney.
+SELECTIVE_HIGH_SCHOOLS = ("sydney girls high", "sydney boys high", "fort street high", "conservatorium high",
+                          "north sydney boys high", "north sydney girls high")
+SELECTIVE_LABEL = "Selective (entry by exam)"
+
+SUPERMARKET_BRANDS = {
+    r"\bwoolworths\b": "Woolworths",
+    r"\bcoles\b(?!\s+express)": "Coles",  # Coles Express is a petrol station shop
+    r"\baldi\b": "Aldi",
+    r"\biga\b": "IGA",
+    r"\bharris farm\b": "Harris Farm",
+    r"\bfood\s?works?\b": "FoodWorks",
+}
+NOT_GROCERIES = re.compile(r"\b(pets?|paws|wellness|coffee)\b", re.I)  # also filed under "Supermarket" in the data
+POI_CATEGORIES = {"supermarket": "Supermarket", "grocery_store": "Supermarket", "convenience_store": "Supermarket",
+                  "park": "Green Spaces"}
+PARK_WORDS = re.compile(r"\b(park|reserve|gardens?|green|oval|playground|square|common)\b", re.I)
 
 
 def or_no_data(value):
@@ -862,7 +884,7 @@ def update_to_today(sale: dict, series: list[dict] | None) -> dict | None:
 def nearby_sales(rows: list[dict] | None, gnaf_id: str, bedrooms, kind: str) -> list[dict]:
     """The 3 nearest recent sales: same bedrooms when known, and the same kind of home where possible."""
     others = [s for s in rows or [] if s.get("price") and s.get("date_sold") and s.get("gnaf_pid") != gnaf_id]
-    same_beds = [s for s in others if s.get("bedrooms") == bedrooms] if isinstance(bedrooms, int) else others
+    same_beds = ([s for s in others if s.get("bedrooms") == bedrooms] if isinstance(bedrooms, int) else []) or others
     same_kind = [s for s in same_beds if (s.get("property_type") or "").lower() == kind]
     nearest = sorted(same_beds, key=lambda s: s.get("dist_km") or 99)
     picked = sorted(same_kind, key=lambda s: s.get("dist_km") or 99)
@@ -872,10 +894,38 @@ def nearby_sales(rows: list[dict] | None, gnaf_id: str, bedrooms, kind: str) -> 
     return [{
         "address": pretty(parse_address(s.get("address") or "")),
         "bedrooms": or_no_data(s.get("bedrooms")),
+        "kind": (s.get("property_type") or "").lower(),
         "price": s["price"],
         "date_sold": s["date_sold"][:10],
         "distance_m": round((s.get("dist_km") or 0) * 1000),
     } for s in picked]
+
+
+def similar_sales_line(sales: list[dict], bedrooms) -> str:
+    """'Similar 3-bed flats nearby sold for $1.06M–$1.60M (Oct 2026)', true to the sales actually listed."""
+    if not sales:
+        return NO_DATA
+    words = {"unit": ("flat", "flats"), "house": ("house", "houses")}
+    kinds = {s["kind"] for s in sales}
+    one, many = words.get(kinds.pop(), ("home", "homes")) if len(kinds) == 1 else ("home", "homes")
+    same_beds = isinstance(bedrooms, int) and all(s["bedrooms"] == bedrooms for s in sales)
+    beds = f"{bedrooms}-bed " if same_beds else ""
+
+    low, high = min(s["price"] for s in sales), max(s["price"] for s in sales)
+    prices = money(low, short=True) if low == high else f"{money(low, short=True)}–{money(high, short=True)}"
+    first, last = (date.fromisoformat(d) for d in (min(s["date_sold"] for s in sales), max(s["date_sold"] for s in sales)))
+    if first.strftime("%b %Y") == last.strftime("%b %Y"):
+        when = last.strftime("%b %Y")
+    elif first.year == last.year:
+        when = f"{first.strftime('%b')}–{last.strftime('%b %Y')}"
+    else:
+        when = f"{first.strftime('%b %Y')}–{last.strftime('%b %Y')}"
+
+    if len(sales) == 1:
+        lead = f"A similar {beds}{one} nearby" if same_beds else f"A {one} nearby"
+    else:
+        lead = f"Similar {beds}{many} nearby" if same_beds else f"{many.capitalize()} nearby"
+    return f"{lead} sold for {prices} ({when})"
 
 
 def price_block(r: dict, comparables: list[dict] | None, series: dict | None, gnaf_id: str, kind: str,
@@ -892,13 +942,15 @@ def price_block(r: dict, comparables: list[dict] | None, series: dict | None, gn
         }
     out = {"status": "no_data", "sale_price": NO_DATA, "sale_date": NO_DATA, "change_pct": NO_DATA,
            "updated_value": NO_DATA, "updated_as_of": NO_DATA, "rough": False, "basis": kind,
-           "valuation": valuation, "nearby_sales": []}
+           "lead": "valuation" if valuation != NO_DATA and kind == "house" else "updated",
+           "valuation": valuation, "nearby_sales": [], "similar_line": NO_DATA}
 
     history = r["history/all"]["data"]
     if building:
         # A sale on a whole-building record can be the whole building ($14.8M at 23-47 Flinders St).
         out["status"] = "building"
         out["nearby_sales"] = nearby_sales(comparables, gnaf_id, None, kind)
+        out["similar_line"] = similar_sales_line(out["nearby_sales"], None)
         return out
     if history is None:
         return out
@@ -906,6 +958,7 @@ def price_block(r: dict, comparables: list[dict] | None, series: dict | None, gn
     if not sale:
         out["status"] = "never_sold"
         out["nearby_sales"] = nearby_sales(comparables, gnaf_id, bedrooms, kind)
+        out["similar_line"] = similar_sales_line(out["nearby_sales"], bedrooms)
         return out
     sold_on = date.fromisoformat(sale["date"][:10])
     out.update(status="sold", sale_price=sale["price"], sale_date=sale["date"][:10],
@@ -913,6 +966,8 @@ def price_block(r: dict, comparables: list[dict] | None, series: dict | None, gn
     updated = update_to_today(sale, (series or {}).get(kind))
     if updated:
         out.update(updated)
+    if out["rough"] and valuation != NO_DATA:
+        out["lead"] = "valuation"  # an old sale moved by a suburb median is a weak guide, so the valuation goes first
     return out
 
 
@@ -925,98 +980,163 @@ def school_kinds(s: dict) -> set[str]:
     """Which of primary and high a school teaches. Most are labelled 'Combined', so read the name too."""
     name = (s.get("name") or "").lower()
     level = s.get("school_level_type")
-    if "distance education" in name or "hospital" in name:
-        return set()
+    if any(w in name for w in ("distance education", "hospital", "intensive english", "infants")):
+        return set()  # not a school a family's children would simply enrol in
     kinds = set()
-    if level == "Primary" or any(w in name for w in ("primary", "public school", "infants")):
+    if level == "Primary" or any(w in name for w in ("primary", "public school")):
         kinds.add("primary")
     if level == "Secondary" or any(w in name for w in ("high school", "secondary")):
         kinds.add("high")
     if "community school" in name or "central school" in name:
         kinds |= {"primary", "high"}
-    if "college" in name and not kinds:
-        kinds.add("college")  # could be any age group, so only a fallback for a high school
     return kinds
 
 
-def nearest_school(schools: list[dict], kind: str):
+def is_selective(s: dict) -> bool:
+    name = (s.get("name") or "").lower()
+    return any(school in name for school in SELECTIVE_HIGH_SCHOOLS)
+
+
+def nearest_school(schools: list[dict], kind: str, nothing: str):
     matching = [s for s in schools if kind in school_kinds(s) and s.get("distance_m") is not None]
-    if not matching and kind == "high":
-        matching = [s for s in schools if "college" in school_kinds(s) and s.get("distance_m") is not None]
     if not matching:
-        return NO_DATA
+        return nothing
     s = min(matching, key=lambda s: s["distance_m"])
-    return place(s["name"], s["distance_m"], naplan=or_no_data(s.get("naplan_label")), sector=or_no_data(s.get("sector")))
+    selective = {"selective": SELECTIVE_LABEL} if is_selective(s) else {}
+    return place(s["name"], s["distance_m"], naplan=or_no_data(s.get("naplan_label")), **selective)
 
 
-def daily_life(r: dict) -> dict:
+def places_around(pois: dict | None, centre: dict) -> list[dict]:
+    """The suburb's full list of places, shaped like the amenities list, with each one's distance from this home.
+
+    /amenities/nearby returns only the 80 nearest places of any kind, all within a few hundred metres in
+    the city, so restaurants crowd out supermarkets and parks. This list has them all, with coordinates.
+    """
+    lat, lng = centre.get("center_lat"), centre.get("center_lng")
+    if lat is None or lng is None:
+        return []
+    rows = []
+    for feature in ((pois or {}).get("pois") or {}).get("features") or []:
+        props = feature.get("properties") or {}
+        coords = (feature.get("geometry") or {}).get("coordinates")
+        category = POI_CATEGORIES.get(props.get("subtype"))
+        if category and coords:
+            east = (coords[0] - lng) * 111320 * math.cos(math.radians(lat))
+            north = (coords[1] - lat) * 110574
+            rows.append({"name": props.get("name"), "category": category, "distance_m": round(math.hypot(east, north))})
+    return rows
+
+
+def nearest_supermarket(amenities: list[dict], nothing: str):
+    """A real supermarket's name where there is one. Anything else filed under 'Supermarket' reads 'Grocery'."""
+    def brand(a: dict) -> str | None:
+        return next((name for pattern, name in SUPERMARKET_BRANDS.items() if re.search(pattern, a.get("name") or "", re.I)), None)
+
+    rows = [a for a in amenities if a.get("category") == "Supermarket" and a.get("distance_m") is not None
+            and not NOT_GROCERIES.search(a.get("name") or "")]
+    if not rows:
+        return nothing
+    a = min(rows, key=lambda a: (brand(a) is None, a["distance_m"]))
+    return {**place("", a["distance_m"]), "name": brand(a) or "Grocery"}  # keeps "IGA" in capitals
+
+
+def nearest_park(amenities: list[dict], nothing: str):
+    """A real park within 1 km if there is one, over a closer path or an unnamed patch of grass."""
+    rows = [a for a in amenities if a.get("category") == "Green Spaces" and a.get("distance_m") is not None]
+    if not rows:
+        return nothing
+    a = min(rows, key=lambda a: (a["distance_m"] > 1000, not PARK_WORDS.search(a.get("name") or ""), a["distance_m"]))
+    is_park = bool(PARK_WORDS.search(a.get("name") or ""))
+    return place(a.get("name") or "Green space", a["distance_m"], short="Park" if is_park else "Green space")
+
+
+def rail_name(stop: dict) -> str:
+    """The data files light rail under 'train' too, sometimes named after its whole line or a tunnel."""
+    name = stop.get("name") or ""
+    if "light rail" in name.lower():
+        return "Light rail stop"
+    if not name or "tunnel" in name.lower():
+        return "Rail stop (no name in the data)"
+    return name
+
+
+def daily_life(r: dict, pois: dict | None) -> dict:
+    def nothing(endpoint: str) -> str:
+        """'None within 1 km' only when the API really found nothing, never when the call itself failed."""
+        return NO_DATA if r[endpoint].get("error") or r[endpoint].get("outside") else NONE_NEARBY
+
     nearest = (r["transport/nearby"]["data"] or {}).get("nearest") or {}
+    train, bus = nearest.get("train"), nearest.get("bus")
+    nearby = r["amenities/nearby"]["data"] or {}
+    amenities = [a for a in (nearby.get("results") or []) + places_around(pois, nearby) if (a.get("distance_m") or 0) <= 2000]
+    counts = nearby.get("counts") or {}
 
-    def stop(mode: str, unnamed: str):
-        s = nearest.get(mode)
-        return place(s.get("name") or unnamed, s["distance_m"]) if s and s.get("distance_m") is not None else NO_DATA
-
-    amenities = (r["amenities/nearby"]["data"] or {}).get("results") or []
-
-    def closest(category: str, fallback: str):
-        rows = [a for a in amenities if a.get("category") == category and a.get("distance_m") is not None]
-        if not rows:
-            return NO_DATA
-        a = min([a for a in rows if a.get("name")] or rows, key=lambda a: a["distance_m"])  # a named one if we can
-        return place(a.get("name") or fallback, a["distance_m"])
+    def no_places(kind: str) -> str:
+        """Only say there are none if the API's own count, which isn't cut off at 80, agrees."""
+        return NO_DATA if counts.get(kind) else nothing("amenities/nearby")
 
     schools = r["schools/all"]["data"] or {}
-    school_rows = schools.get("ranking") or schools.get("nearby") or []
-    return {
-        "train": stop("train", "Rail stop (no name in the data)"),
-        "light_rail": stop("tram", "Light rail stop"),
-        "bus": stop("bus", "Bus stop"),
-        "supermarket": closest("Supermarket", "Supermarket"),
-        "park": closest("Green Spaces", "Green space"),
-        "primary_school": nearest_school(school_rows, "primary"),
-        "high_school": nearest_school(school_rows, "high"),
+    public_schools = [s for s in schools.get("ranking") or schools.get("nearby") or [] if s.get("sector") == "public"]
+
+    high = nearest_school(public_schools, "high", nothing("schools/all"))
+    life = {
+        "train": place(rail_name(train), train["distance_m"]) if train and train.get("distance_m") is not None else nothing("transport/nearby"),
+        "bus": place(bus.get("name") or "Bus stop", bus["distance_m"]) if bus and bus.get("distance_m") is not None else nothing("transport/nearby"),
+        "supermarket": nearest_supermarket(amenities, no_places("supermarket")),
+        "park": nearest_park(amenities, no_places("green_spaces")),
+        "primary_school": nearest_school(public_schools, "primary", nothing("schools/all")),
+        "high_school": high,
     }
+    if isinstance(high, dict) and high.get("selective"):
+        life["non_selective_high_school"] = nearest_school(
+            [s for s in public_schools if not is_selective(s)], "high", nothing("schools/all"))
+    return life
 
 
 def flag_rows(layers: dict | None) -> list[dict]:
-    """The same reading of the risk layers as summarise_risks(), worded for the panel."""
+    """The same reading of the risk layers as summarise_risks(), worded for the panel.
+
+    'applies' marks what the panel shows: on the property or within 200 m. Public housing stays
+    neutral ('info') however close it is, because it's a share of homes in an area, not a hazard.
+    """
     rows = []
     for key, label in FLAGS.items():
         if layers is None:
-            rows.append({"key": key, "label": label, "text": NO_DATA, "level": "unknown"})
+            rows.append({"key": key, "label": label, "text": NO_DATA, "level": "unknown", "applies": False})
             continue
         items = [i for i in layers.get(key) or [] if i.get("nearest_distance_m") is not None]
         on_property = [i for i in items if i.get("on_property")]
         nearest = min((i["nearest_distance_m"] for i in items), default=None)
-        if key == "public_housing":
-            # This layer is a share of homes in the small area around the address, not a fact about the home.
-            if on_property:
-                text = f"About {on_property[0].get('value')} of homes in this small area"
-            else:
-                text = f"Nearby, {nearest:.0f} m" if nearest is not None else "None within 1 km"
-            rows.append({"key": key, "label": label, "text": text, "level": "info"})
-        elif on_property:
-            rows.append({"key": key, "label": label, "text": "On this property", "level": "high"})
+        close = nearest is not None and nearest < NEAR_M
+
+        if on_property:
+            text = f"About {on_property[0].get('value')} of homes in this small area" if key == "public_housing" else "On this property"
+        elif close:
+            text = f"Nearby, {nearest:.0f} m"
         elif nearest is not None:
-            rows.append({"key": key, "label": label, "text": f"Nearby, {nearest:.0f} m", "level": "medium" if nearest < 200 else "low"})
+            text = f"Nearest {nearest:.0f} m away"
         else:
-            rows.append({"key": key, "label": label, "text": "None within 1 km", "level": "ok"})
+            text = NONE_NEARBY
+
+        level = "high" if on_property else "medium" if close else "low" if nearest is not None else "ok"
+        rows.append({"key": key, "label": label, "text": text, "level": "info" if key == "public_housing" else level,
+                     "applies": bool(on_property or close)})
     return rows
 
 
 def agent_questions(flags: list[dict], kind: str) -> list[str]:
-    close = {f["key"] for f in flags if f["level"] in ("high", "medium")}
+    """Only what the flags on this property call for, plus strata for flats."""
+    on_property = {f["key"] for f in flags if f["level"] == "high"}
     questions = []
-    if close & {"flood", "historical_flood"}:
+    if on_property & {"flood", "historical_flood"}:
         questions.append("Has the building ever flooded?" if kind == "unit" else "Has the home ever flooded?")
-    if "heritage" in close:
+    if "heritage" in on_property:
         questions.append("Are there limits on renovating?")
-    if "hv_power_line" in close:
+    if "hv_power_line" in on_property:
         questions.append("How close are the power lines?")
-    if not questions:
-        questions.append("Are any special levies or big repairs planned?" if kind == "unit"
-                         else "Has any major work been done, and was it approved?")
-    return [*questions, "What are the strata levies?"]
+    if kind == "unit":
+        questions.append("What are the strata levies?")
+    return questions
 
 
 def street_rank(data: dict | None):
@@ -1060,8 +1180,10 @@ def build_report(gnaf_id: str, address: str, has_unit: bool, building: bool, sit
 
     needs_comparables = building or not last_sold(r["history/all"]["data"] or {})
     series_future = POOL.submit(call, client().suburb, suburb, "market/median-sale-price-series") if suburb else None
+    pois_future = POOL.submit(call, client().suburb, suburb, "lifestyle/pois") if suburb else None
     comparables = call(client().property, gnaf_id, "comparables/recent-sales-nearby")["data"] if needs_comparables else None
     series = series_future.result()["data"] if series_future else None
+    pois = pois_future.result()["data"] if pois_future else None
 
     flags = flag_rows(r["risks/all"]["data"])
     today = datetime.now(timezone(timedelta(hours=11))).date()  # Sydney, close enough for a "checked on" date
@@ -1076,7 +1198,7 @@ def build_report(gnaf_id: str, address: str, has_unit: bool, building: bool, sit
             "parking": or_no_data(basics.get("parking_count") or None),
         },
         "price": price_block(r, comparables, series, gnaf_id, kind, bedrooms, building),
-        "daily_life": daily_life(r),
+        "daily_life": daily_life(r, pois),
         "flags": flags,
         "street": street_rank(r["street/profile"]["data"]),
         "ask_agent": agent_questions(flags, kind),

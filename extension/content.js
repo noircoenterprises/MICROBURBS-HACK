@@ -76,8 +76,9 @@
   const money = (n) => "$" + Math.round(n).toLocaleString("en-AU");
   const shortMoney = (n) => (n >= 1e6 ? `$${(n / 1e6).toFixed(2)}M` : `$${Math.round(n / 1e3)}k`);
   const asDate = (iso) => new Date(`${String(iso).slice(0, 10)}T00:00:00`);
-  const monthYear = (iso) => asDate(iso).toLocaleDateString("en-AU", { month: "short", year: "numeric" });
-  const fullDate = (iso) => asDate(iso).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" });
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const monthYear = (iso) => `${MONTHS[asDate(iso).getMonth()]} ${asDate(iso).getFullYear()}`;
+  const fullDate = (iso) => `${asDate(iso).getDate()} ${monthYear(iso)}`;
   const metres = (m) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`);
 
   const LOGO = `<svg viewBox="64 117 470 470" aria-hidden="true"><path d="M145 557C125.6 556.5 125.5 556.4 119 553.3C104.6 546.3 95.3 533.7 93 518.5C92.3 513.9 92 477.3 92.2 411C92.5 311.1 92.5 310.5 94.6 304.9C95.8 301.8 97.6 297.8 98.5 295.9C101.2 290.8 110.5 281.5 120.5 273.9C128.9 267.6 137.3 261.1 151.6 249.9C171.1 234.7 180 227.9 186.1 223.5C189.9 220.8 195.6 216.5 198.8 214C222.8 195.2 266.7 161.5 273.8 156.5C284.9 148.6 301.3 145.8 315.3 149.5C325.2 152.1 328.2 154.1 358.4 178C364.3 182.7 372.5 189.1 376.6 192.2C380.7 195.3 385.8 199.4 387.8 201.2C395.7 208.4 399.1 210.5 400.1 208.9C400.6 208.1 401 201 401 193C401 180.4 401.3 178.1 403 175.3C406.6 169.3 408.3 169 435.3 169C459.1 169 459.8 169.1 463.1 171.3C469.5 175.6 469.4 175 470 223.3L470.5 267.1L474.6 270.3C492.6 284.2 497.4 289.1 501.5 297.5C507.2 309.2 507.1 305.6 506.8 418.7L506.5 522.6L502.8 530.1C498 539.8 494.4 543.9 486.1 549.4C473.4 557.8 486.6 557.2 316 557.4C232.7 557.4 155.7 557.3 145 557Z" fill="#0065f6" fill-rule="evenodd"/><path d="M368.2 517.8C364.6 514 362.6 509.5 360.6 501.1C358.7 492.8 359.6 492.1 368.9 495.1C375.6 497.3 376.1 497.3 381.4 495.8C388.9 493.7 389.7 494.7 387.5 503.2C383.5 518.9 375.4 525.1 368.2 517.8ZM373 480.5C369.7 477 367.3 476.5 362.9 478.6C359.5 480.1 358.3 480.2 353.7 479.1C342.8 476.6 335 470.4 335 464.3C335 463.1 333.6 460.5 331.9 458.5C329.3 455.6 328.1 455 324.9 455L321 455L323.2 450.5C325.5 445.8 325.1 443.8 322.2 445.7C317.2 449.2 311.5 452 310.4 451.6C309.7 451.3 307.9 448.8 306.5 445.9C302.7 438.6 295.9 431.6 289.8 429C281.7 425.5 275 425.4 263.9 428.3C251.3 431.7 244.1 435 238.8 439.8C232.2 445.9 230.6 446.4 219 446.5C208.6 446.6 208.4 446.7 200.5 450.9C193.5 454.7 191.9 455.2 188 454.7C182.3 454 178.8 452.4 177.2 449.9C176.2 448.3 176.3 447.3 178 444C182 436.2 180.3 428.3 170.4 406.9C166.4 398.1 165.9 396.2 164.9 385.5C163.7 372.5 164.3 368.4 168.2 363.5C171.8 358.9 181.9 353.1 190.9 350.4C208.3 345.1 213.4 341.4 217.5 331.4C219.1 327.3 221 324.6 223.7 322.5C225.8 320.9 230.2 316.4 233.5 312.7C244.6 300.1 251.2 297.5 259.7 302.6C268.3 307.8 268.7 307.7 270.9 300.8C273.7 292.1 281.5 285 288.1 285C292.3 285 294.2 283.3 293.3 280.2C292.4 276.7 295.2 276.6 303.1 280C309.3 282.7 311.9 283.2 319 283.4C331.9 283.6 332.4 284.7 325.5 295.4C320.9 302.4 320 306.3 322.2 309.2C322.9 310.1 328.6 314 334.9 317.9C343.9 323.5 347.1 325 350.2 325C357.2 325 359.9 320.4 362.4 304C366 281 370.2 268.9 373 273C373.6 273.8 375.7 279.8 377.8 286.3C381.3 297.6 381.7 298.3 385.2 300.1C387.3 301.2 389.7 303.1 390.5 304.4C391.4 305.7 393.4 312.8 394.9 320.2C396.4 327.5 398.3 334.7 399.1 336.3C399.9 337.8 402.8 340.5 405.5 342.3C409.5 344.9 411.5 347.4 416.5 356.1C419.9 361.9 424.3 368.8 426.3 371.4C435.6 383.6 437.9 396.8 433.8 414C432.2 420.4 429.7 425.2 422.1 436C414.2 447.1 409.6 454.7 404.5 465C402.4 469.1 400 473 399.1 473.7C398.2 474.4 395 475.4 392 476.1C389 476.7 384.4 478.5 381.9 480.1C376.3 483.6 376 483.6 373 480.5Z" fill="#fff" fill-rule="evenodd" stroke="#fff" stroke-width="10" stroke-linejoin="round"/></svg>`;
@@ -140,26 +141,34 @@
     .sale { display: grid; grid-template-columns: 1fr auto; gap: 0 10px; padding: 6px 0; border-top: 1px dashed var(--line); }
     .sale:first-of-type { border-top: 0; }
     .sale strong { font: 600 15px/1.2 var(--serif); color: var(--navy); font-variant-numeric: lining-nums; text-align: right; }
-    .sublabel { margin: 9px 0 2px; font-weight: 700; font-size: 12.5px; color: var(--navy); }
+    .similar { margin: 6px 0 3px; font-weight: 600; font-size: 13px; line-height: 1.3; color: var(--navy); }
+    .eyebrow { font-weight: 600; font-size: 12.5px; }
+    .then { margin-top: 10px; padding-top: 9px; border-top: 1px dashed var(--line); }
+    .then .nosale { font-size: 15px; }
 
     .sec { padding: 12px 16px; border-top: 1px solid var(--line); }
     .head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 5px; }
     .title { font-weight: 700; font-size: 13.5px; color: var(--navy); }
-    .row { display: grid; grid-template-columns: 70px 1fr auto; gap: 0 8px; align-items: baseline; padding: 3.5px 0; }
+    .row { display: grid; grid-template-columns: 74px 1fr auto; gap: 0 8px; align-items: baseline; padding: 3.5px 0; }
     .label { font-size: 11.5px; color: var(--grey); }
     .name { display: block; font-weight: 600; line-height: 1.25; }
     .nodata { color: var(--grey); font-weight: 400; }
     .walk { font-size: 11px; color: var(--grey); white-space: nowrap; text-align: right; }
     .walk b { font-size: 15px; color: var(--blue); font-weight: 700; }
     .naplan { display: block; font-size: 11.5px; color: var(--grey); }
+    .selective { display: block; font-size: 11.5px; font-weight: 700; color: var(--deep); white-space: nowrap; }
+    .metro { padding-bottom: 3px; font-size: 11px; color: var(--grey); }
+    .quick { margin-top: 5px; padding-top: 7px; border-top: 1px dashed var(--line); font-size: 12.5px; }
+    .quick b { color: var(--blue); font-weight: 700; }
 
     .flag { display: grid; grid-template-columns: 10px 1fr auto; gap: 0 8px; align-items: center; padding: 3.5px 0; }
     .dot { width: 8px; height: 8px; border-radius: 50%; background: #c6d0de; }
-    .dot.high { background: var(--red); } .dot.medium { background: var(--amber); } .dot.info { background: #8aa4d6; }
+    .dot.high { background: var(--red); } .dot.medium { background: var(--amber); }
     .flag .what { font-weight: 600; }
     .flag .said { font-size: 12.5px; color: var(--grey); text-align: right; }
     .flag .said.high { color: var(--red); font-weight: 700; } .flag .said.medium { color: var(--amber); font-weight: 600; }
 
+    .clear { padding: 2px 0; font-weight: 600; color: var(--green); }
     .rank { font-size: 13.5px; }
     .rank b { font: 600 22px/1 var(--serif); color: var(--navy); font-variant-numeric: lining-nums; }
 
@@ -228,97 +237,133 @@
     </div>`;
   }
 
-  function salesHtml(price, bedrooms) {
+  function leadValuationHtml(valuation) {
+    const range = isNumber(valuation.low) && isNumber(valuation.high) ? `${shortMoney(valuation.low)} to ${shortMoney(valuation.high)}` : "";
+    const when = valuation.date !== NO_DATA ? monthYear(valuation.date) : "";
+    return `<div class="eyebrow">Microburbs valuation</div>
+      <div class="today">${money(valuation.value)}</div>
+      <div class="how">${[range, when].filter(Boolean).join(" · ")}</div>`;
+  }
+
+  function salesHtml(price) {
     const sales = price.nearby_sales || [];
-    if (!sales.length) return `<div class="sublabel">Recent sales nearby</div><div class="nodata">${NO_DATA}</div>`;
-    const heading = isNumber(bedrooms) && price.status === "never_sold" ? `Recent ${bedrooms}-bed sales nearby` : "Recent sales nearby";
-    return `<div class="sublabel">${heading}</div>` + sales.map((s) => `<div class="sale">
+    if (!sales.length) return `<div class="similar nodata">Recent sales nearby: ${NO_DATA}</div>`;
+    return `<div class="similar">${esc(price.similar_line)}</div>` + sales.map((s) => `<div class="sale">
         <span class="name">${esc(s.address)}</span><strong>${money(s.price)}</strong>
         <span class="date">${isNumber(s.bedrooms) ? `${s.bedrooms} bed · ` : ""}${metres(s.distance_m)} away</span>
         <span class="date">${monthYear(s.date_sold)}</span>
       </div>`).join("");
   }
 
-  function priceHtml(price, home) {
-    let main;
+  // "Last sold $X (Mon YYYY) → about $Y today", with $Y big when it's the lead and in the text when it isn't.
+  function updatedHtml(price, isLead) {
+    const sold = `Last sold <b>${money(price.sale_price)}</b> <span class="date">(${monthYear(price.sale_date)})</span>`;
+    if (!isNumber(price.updated_value)) return `<div class="sold">${sold}</div><div class="how">Updated price: ${NO_DATA}</div>`;
+    const kind = price.basis === "house" ? "House" : "Unit";
+    const sign = price.change_pct > 0 ? "+" : "";
+    const how = `<div class="how">${kind} prices in this suburb moved ${sign}${price.change_pct}% since that sale. Median as at ${monthYear(price.updated_as_of)}.</div>`;
+    const rough = price.rough ? `<div class="rough">Rough guide: this sale is over 10 years old</div>` : "";
+    return isLead
+      ? `<div class="sold">${sold} →</div><div class="today"><small>about</small> ${money(price.updated_value)} <small>today</small></div>${how}${rough}`
+      : `<div class="sold">${sold} → about <b>${money(price.updated_value)}</b> today</div>${how}${rough}`;
+  }
+
+  function priceHtml(price) {
+    const valuation = price.valuation;
+    const valuationLeads = price.lead === "valuation" && valuation && valuation !== NO_DATA;
+    let body;
     if (price.status === "sold") {
-      main = `<div class="sold">Last sold <b>${money(price.sale_price)}</b> <span class="date">(${monthYear(price.sale_date)})</span>${isNumber(price.updated_value) ? " →" : ""}</div>`;
-      if (isNumber(price.updated_value)) {
-        const kind = price.basis === "house" ? "House" : "Unit";
-        const sign = price.change_pct > 0 ? "+" : "";
-        main += `<div class="today"><small>about</small> ${money(price.updated_value)} <small>today</small></div>
-          <div class="how">${kind} prices in this suburb moved ${sign}${price.change_pct}% since that sale. Median as at ${monthYear(price.updated_as_of)}.</div>`;
-        if (price.rough) main += `<div class="rough">Rough guide: this sale is over 10 years old</div>`;
-      } else {
-        main += `<div class="how">Updated price: ${NO_DATA}</div>`;
-      }
+      body = valuationLeads
+        ? `${leadValuationHtml(valuation)}<div class="then">${updatedHtml(price, false)}</div>`
+        : updatedHtml(price, true) + valuationHtml(valuation);
     } else if (price.status === "never_sold") {
-      main = `<div class="nosale">No sale on record</div>` + salesHtml(price, home.bedrooms);
+      const noSale = `<div class="nosale">No sale on record</div>${salesHtml(price)}`;
+      body = valuationLeads ? `${leadValuationHtml(valuation)}<div class="then">${noSale}</div>` : noSale + valuationHtml(valuation);
     } else if (price.status === "building") {
-      main = `<div class="nosale">No price for one flat</div>
-        <div class="how">This record covers the whole building, so any sale on it may not be for one home.</div>` + salesHtml(price);
+      body = `<div class="nosale">No price for one flat</div>
+        <div class="how">This record covers the whole building, so any sale on it may not be for one home.</div>${salesHtml(price)}`;
     } else {
-      main = `<div class="nosale">Price: ${NO_DATA}</div>`;
+      body = `<div class="nosale">Price: ${NO_DATA}</div>${valuationHtml(valuation)}`;
     }
-    return `<div class="price">${main}${price.status === "building" ? "" : valuationHtml(price.valuation)}</div>`;
+    return `<div class="price">${body}</div>`;
   }
 
   function placeHtml(label, place) {
-    if (!place || place === NO_DATA) {
-      return `<div class="row"><span class="label">${label}</span><span class="name nodata">${NO_DATA}</span></div>`;
+    if (!place || typeof place === "string") {
+      return `<div class="row"><span class="label">${label}</span><span class="name nodata">${esc(place || NO_DATA)}</span></div>`;
     }
-    const sector = place.sector && place.sector !== NO_DATA ? ` · ${esc(place.sector[0].toUpperCase() + place.sector.slice(1))}` : "";
-    const school = place.naplan ? `<span class="naplan">NAPLAN: ${esc(place.naplan)}${sector}</span>` : "";
+    const selective = place.selective ? `<span class="selective">${esc(place.selective)}</span>` : "";
+    const naplan = place.naplan ? `<span class="naplan">NAPLAN: ${esc(place.naplan)}</span>` : "";
     return `<div class="row">
       <span class="label">${label}</span>
-      <span><span class="name">${esc(place.name)}</span>${school}</span>
+      <span><span class="name">${esc(place.name)}</span>${selective}${naplan}</span>
       <span class="walk">about <b>${place.walk_min}</b> min walk</span>
     </div>`;
   }
 
+  function quickItem(label, place) {
+    if (!place || typeof place === "string") return `${esc(label)}: ${esc(place || NO_DATA)}`;
+    return `${esc(label)} <b>${place.walk_min}</b> min`;
+  }
+
   function dailyLifeHtml(life, checked) {
+    const shop = life.supermarket;
+    const park = life.park;
+    const quick = [
+      quickItem("Bus", life.bus),
+      quickItem(shop && shop.name ? shop.name : "Grocery", shop),
+      quickItem(park && park.short ? park.short : "Park", park),
+    ].join(" · ");
     return `<div class="sec">
       <div class="head"><span class="title">Daily life</span><span class="date">Checked ${fullDate(checked)}</span></div>
-      ${placeHtml("Train", life.train)}
-      ${placeHtml("Light rail", life.light_rail)}
-      ${placeHtml("Bus", life.bus)}
-      ${placeHtml("Supermarket", life.supermarket)}
-      ${placeHtml("Park", life.park)}
+      ${placeHtml("Rail", life.train)}
+      <div class="metro">New Metro stations (e.g. Waterloo) aren't in the data yet</div>
       ${placeHtml("Primary", life.primary_school)}
       ${placeHtml("High school", life.high_school)}
+      ${life.non_selective_high_school ? placeHtml("Non-selective", life.non_selective_high_school) : ""}
+      <div class="quick" title="Estimated walking times">${quick}</div>
     </div>`;
   }
 
   function flagsHtml(flags, checked) {
+    let body;
+    if (flags.every((f) => f.level === "unknown")) {
+      body = `<span class="nodata">${NO_DATA}</span>`; // the check itself failed, so we can't say it's all clear
+    } else {
+      const shown = flags.filter((f) => f.applies);
+      const hazards = shown.filter((f) => f.key !== "public_housing");
+      body = (hazards.length ? "" : `<div class="clear">No flood, heritage or power-line issues nearby ✓</div>`)
+        + shown.map((f) => `<div class="flag">
+            <span class="dot ${esc(f.level)}"></span><span class="what">${esc(f.label)}</span><span class="said ${esc(f.level)}">${esc(f.text)}</span>
+          </div>`).join("");
+    }
     return `<div class="sec">
-      <div class="head"><span class="title">What the listing won't tell you</span><span class="date">Checked ${fullDate(checked)}</span></div>
-      ${flags.map((f) => `<div class="flag">
-        <span class="dot ${esc(f.level)}"></span><span class="what">${esc(f.label)}</span><span class="said ${esc(f.level)}">${esc(f.text)}</span>
-      </div>`).join("")}
+      <div class="head"><span class="title">Things to check before you buy</span><span class="date">Checked ${fullDate(checked)}</span></div>
+      ${body}
     </div>`;
   }
 
   function streetHtml(street) {
-    let body = `<span class="nodata">${NO_DATA}</span>`;
-    if (street && street !== NO_DATA) {
-      const forecast = isNumber(street.annual_4y)
-        ? `Forecast ${street.annual_4y}% a year${isNumber(street.suburb_annual_4y) ? `, against ${street.suburb_annual_4y}% for the suburb` : ""}`
-        : "";
-      const asOf = street.as_of !== NO_DATA ? `Forecast from ${street.as_of}` : "";
-      body = `<div class="rank">${esc(street.street)} ranks <b>${street.rank}</b> of ${street.total} streets in ${esc(street.suburb)} on 4-year forecast growth.</div>
-        <div class="how">${[forecast, street.band !== NO_DATA ? esc(street.band) : "", asOf].filter(Boolean).join(" · ")}</div>`;
-    }
-    return `<div class="sec"><div class="head"><span class="title">This street</span></div>${body}</div>`;
+    if (!street || street === NO_DATA) return "";
+    const forecast = isNumber(street.annual_4y)
+      ? `Forecast ${street.annual_4y}% a year${isNumber(street.suburb_annual_4y) ? `, against ${street.suburb_annual_4y}% for the suburb` : ""}`
+      : "";
+    const asOf = street.as_of !== NO_DATA ? `Forecast from ${street.as_of}` : "";
+    return `<div class="sec">
+      <div class="head"><span class="title">This street</span></div>
+      <div class="rank">${esc(street.street)} ranks <b>${street.rank}</b> of ${street.total} streets in ${esc(street.suburb)} on 4-year forecast growth.</div>
+      <div class="how">${[forecast, street.band !== NO_DATA ? esc(street.band) : "", asOf].filter(Boolean).join(" · ")}</div>
+    </div>`;
   }
 
   function reportHtml(data, level) {
-    const home = data.home || {};
+    const questions = data.ask_agent || [];
     return matchHtml(data, level)
-      + priceHtml(data.price, home)
+      + priceHtml(data.price)
       + dailyLifeHtml(data.daily_life, data.checked_on)
       + flagsHtml(data.flags, data.checked_on)
       + streetHtml(data.street)
-      + `<div class="sec"><div class="head"><span class="title">Ask the agent</span></div><ul>${data.ask_agent.map((q) => `<li>${esc(q)}</li>`).join("")}</ul></div>`
+      + (questions.length ? `<div class="sec"><div class="head"><span class="title">Ask the agent</span></div><ul>${questions.map((q) => `<li>${esc(q)}</li>`).join("")}</ul></div>` : "")
       + `<div class="foot">
           <a class="report" href="${esc(data.full_report_url)}" target="_blank" rel="noopener">Full report</a>
           <a class="credit" href="https://www.microburbs.com.au" target="_blank" rel="noopener">Data: Microburbs</a>

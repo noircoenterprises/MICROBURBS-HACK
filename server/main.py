@@ -911,6 +911,13 @@ def update_to_today(sale: dict, series: list[dict] | None) -> dict | None:
     }
 
 
+def inside_valuation_range(value: int, valuation) -> bool:
+    if not isinstance(valuation, dict):
+        return False
+    low, high = valuation.get("low"), valuation.get("high")
+    return isinstance(low, (int, float)) and isinstance(high, (int, float)) and low <= value <= high
+
+
 def nearby_sales(rows: list[dict] | None, gnaf_id: str, bedrooms, kind: str) -> list[dict]:
     """The 3 nearest recent sales: same bedrooms when known, and the same kind of home where possible."""
     others = [s for s in rows or [] if s.get("price") and s.get("date_sold") and s.get("gnaf_pid") != gnaf_id]
@@ -994,7 +1001,8 @@ def price_block(r: dict, comparables: list[dict] | None, series: dict | None, gn
     out.update(status="sold", sale_price=sale["price"], sale_date=sale["date"][:10],
                rough=(date.today() - sold_on).days > 3652)
     updated = update_to_today(sale, (series or {}).get(kind))
-    if updated:
+    # A house only gets an updated price if it falls inside the valuation's range. Flats have no such check.
+    if updated and (kind != "house" or inside_valuation_range(updated["updated_value"], valuation)):
         out.update(updated)
     if out["rough"] and valuation != NO_DATA:
         out["lead"] = "valuation"  # an old sale moved by a suburb median is a weak guide, so the valuation goes first
@@ -1086,7 +1094,7 @@ def rail_name(stop: dict) -> str:
     if "light rail" in name.lower():
         return "Light rail stop"
     if not name or "tunnel" in name.lower():
-        return "Rail stop (no name in the data)"
+        return "Rail stop"
     return name
 
 

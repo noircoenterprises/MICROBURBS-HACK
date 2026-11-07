@@ -80,4 +80,5 @@ Neither miss showed facts for a wrong home: in both, the right record was on the
 - Selective schools are a fixed list in our code: the four requested, plus North Sydney Boys and Girls, which also appear in the data.
 - Lettered units stored without the letter (`C1109` as `1109`) are an inference, and the panel says so.
 - A home with no unit and no dwelling type in the data (such as 121 Lawson St, Redfern) is treated as a flat, for its price series and the strata question.
-- An old sale moved by a suburb median can be far from the asking price: 120-122 Lawson St comes out at about $2.94M, against an $8M asking price in the data. The panel marks sales over 10 years old as rough.
+- Flats have no valuation-range check on their updated price. A house only shows it when it falls inside Microburbs' valuation range (so 120-122 Lawson St, with no valuation, shows just its last sale). Sales over 10 years old are marked rough.
+- Nearby sales ignore views and penthouses: they match on distance, bedrooms when known and kind of home.

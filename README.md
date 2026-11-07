@@ -38,7 +38,7 @@ So the panel takes the home's own last sale and moves it by how much its suburb'
 updated value = sale price x (latest suburb median / suburb median nearest the sale date)
 ```
 
-It uses the unit median for flats and the house median for houses. For houses, and for sales over 10 years old, the valuation goes first when one exists.
+It uses the unit median for flats and the house median for houses. For houses, and for sales over 10 years old, the valuation goes first when one exists. A house only shows the updated price when it falls inside Microburbs' valuation range; otherwise it shows just the last sale.
 
 ## Data used
 

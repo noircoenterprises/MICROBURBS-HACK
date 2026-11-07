@@ -258,7 +258,10 @@
   // "Last sold $X (Mon YYYY) → about $Y today", with $Y big when it's the lead and in the text when it isn't.
   function updatedHtml(price, isLead) {
     const sold = `Last sold <b>${money(price.sale_price)}</b> <span class="date">(${monthYear(price.sale_date)})</span>`;
-    if (!isNumber(price.updated_value)) return `<div class="sold">${sold}</div><div class="how">Updated price: ${NO_DATA}</div>`;
+    if (!isNumber(price.updated_value)) {
+      // A house with no updated price just shows its last sale: see the valuation-range rule on the server.
+      return `<div class="sold">${sold}</div>${price.basis === "house" ? "" : `<div class="how">Updated price: ${NO_DATA}</div>`}`;
+    }
     const kind = price.basis === "house" ? "House" : "Unit";
     const sign = price.change_pct > 0 ? "+" : "";
     const how = `<div class="how">${kind} prices in this suburb moved ${sign}${price.change_pct}% since that sale. Median as at ${monthYear(price.updated_as_of)}.</div>`;

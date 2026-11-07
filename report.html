@@ -88,20 +88,20 @@
         <tr><th>Fact</th><th>realestate.com.au</th><th>Domain</th><th>Homer</th><th class="ours">Our panel</th></tr>
       </thead>
       <tbody>
-        <tr><th>This home's last sale price</th><td>To confirm</td><td>Year only</td><td>Not mentioned</td><td class="ours">Yes, with its date</td></tr>
-        <tr><th>Last sale updated to today's prices</th><td>To confirm</td><td>No</td><td>Not mentioned</td><td class="ours">Yes</td></tr>
-        <tr><th>Valuation and range</th><td>To confirm</td><td>Not on the listing</td><td>Not mentioned</td><td class="ours">Yes, when one exists</td></tr>
-        <tr><th>Schools</th><td>To confirm</td><td>Catchments and nearby lists, no NAPLAN</td><td>Not mentioned</td><td class="ours">Nearest public primary and high, NAPLAN label, selective label</td></tr>
-        <tr><th>Walking times to rail, bus, supermarket and park</th><td>To confirm</td><td>No</td><td>Not mentioned</td><td class="ours">Yes</td></tr>
-        <tr><th>Flood, heritage and power lines</th><td>To confirm</td><td>No</td><td>Not mentioned</td><td class="ours">Yes</td></tr>
-        <tr><th>Public housing estimate</th><td>To confirm</td><td>No</td><td>Not mentioned</td><td class="ours">Yes, in neutral wording</td></tr>
-        <tr><th>The street's rank on forecast growth</th><td>To confirm</td><td>No</td><td>Not mentioned</td><td class="ours">Yes, when there's data</td></tr>
-        <tr><th>Questions for the agent, based on the flags</th><td>To confirm</td><td>No</td><td>Not mentioned</td><td class="ours">Yes</td></tr>
-        <tr><th>Price guide history and agent pricing patterns</th><td>To confirm</td><td>Current guide only</td><td>Yes, its main focus</td><td class="ours">No</td></tr>
+        <tr><th>This home's last sale price</th><td>Not checked</td><td>Year only</td><td>Not mentioned</td><td class="ours">Yes, with its date</td></tr>
+        <tr><th>Last sale updated to today's prices</th><td>Not checked</td><td>No</td><td>Not mentioned</td><td class="ours">Flats, and houses when inside the valuation range</td></tr>
+        <tr><th>Valuation and range</th><td>Not checked</td><td>Not on the listing</td><td>Not mentioned</td><td class="ours">Yes, when one exists</td></tr>
+        <tr><th>Schools</th><td>Not checked</td><td>Catchments and nearby lists, no NAPLAN</td><td>Not mentioned</td><td class="ours">Nearest public primary and high, NAPLAN label, selective label</td></tr>
+        <tr><th>Walking times to rail, bus, supermarket and park</th><td>Not checked</td><td>No</td><td>Not mentioned</td><td class="ours">Yes</td></tr>
+        <tr><th>Flood, heritage and power lines</th><td>Not checked</td><td>No</td><td>Not mentioned</td><td class="ours">Yes</td></tr>
+        <tr><th>Public housing estimate</th><td>Not checked</td><td>No</td><td>Not mentioned</td><td class="ours">Yes, in neutral wording</td></tr>
+        <tr><th>The street's rank on forecast growth</th><td>Not checked</td><td>No</td><td>Not mentioned</td><td class="ours">Yes, when there's data</td></tr>
+        <tr><th>Questions for the agent, based on the flags</th><td>Not checked</td><td>No</td><td>Not mentioned</td><td class="ours">Yes</td></tr>
+        <tr><th>Price guide history and agent pricing patterns</th><td>Not checked</td><td>Current guide only</td><td>Yes, its main focus</td><td class="ours">No</td></tr>
       </tbody>
     </table>
   </div>
-  <p class="note">Domain: the sections of one listing (103/320 Harris Street, Pyrmont), read on 7 November 2026. realestate.com.au: one listing, looked at by a team member. Homer: its Chrome Web Store description; we did not install it, so "Not mentioned" doesn't prove it's absent.</p>
+  <p class="note">Domain: the sections of one listing (103/320 Harris Street, Pyrmont), read on 7 November 2026. realestate.com.au: not checked, because our tools can't open that site. We did test the panel there. Homer: its Chrome Web Store description; we did not install it, so "Not mentioned" doesn't prove it's absent.</p>
 
   <h2>What our separate check showed</h2>
   <p class="big">8 of 10</p>
@@ -131,7 +131,7 @@
   <p><strong>Matching comes first.</strong> "Exact" needs the unit, street number, street and suburb all to agree. Anything less becomes a list to pick from, or a box to type in.</p>
   <p><strong>The price is our clever step.</strong> It takes the home's own last sale and moves it by how much its suburb's median has moved since:</p>
   <p class="sum">updated value = sale price × (latest suburb median ÷ suburb median nearest the sale date)</p>
-  <p>For houses, and for sales over 10 years old, the valuation goes first when one exists. The server keeps the API key, and the extension never sees it.</p>
+  <p>For houses, and for sales over 10 years old, the valuation goes first when one exists. A house only shows the updated price when it falls inside Microburbs' valuation range; otherwise it shows just the last sale. The server keeps the API key, and the extension never sees it.</p>
 
   <h2>How did we check it?</h2>
   <ul>
@@ -157,9 +157,10 @@
   <h2>What remains uncertain?</h2>
   <ul>
     <li><strong>New Metro stations aren't in the data yet.</strong> We found no Waterloo, Barangaroo or Gadigal station. Light rail is mixed in with trains, so the panel's row reads "Rail" and carries a small note.</li>
-    <li><strong>Walking times are straight lines</strong> at 80 m a minute. They can cross water, such as Pyrmont to Balmain.</li>
+    <li><strong>Walking times are straight-line estimates</strong> at 80 m a minute, so they can cross water, such as Pyrmont to Balmain.</li>
     <li><strong>Public housing is an estimate</strong> for the small area around a home, not a fact about the home.</li>
-    <li><strong>Price changes are at suburb level,</strong> not for one building. An old sale can land far from today's market: 120-122 Lawson Street comes out at about $2.94M, against an $8M asking price in the data. Sales over 10 years old are marked rough.</li>
+    <li><strong>Price changes are at suburb level,</strong> not for one building. Flats have no valuation-range check, so an updated price can still be off. Sales over 10 years old are marked rough.</li>
+    <li><strong>Nearby sales ignore views and penthouses.</strong> They match on distance, bedrooms when known and kind of home, so a range can be wide: $706k to $21.50M near 96-98 Elizabeth Bay Road.</li>
     <li><strong>Coverage is thin for flats.</strong> Of the 7 flats in our holdout, 1 had a valuation and 3 had a sale to update. The others show similar nearby sales instead.</li>
     <li><strong>Dropping a unit's letter is an inference.</strong> We treat C1109 as 1109 only when no unit in the building has a letter and exactly one flat has those digits. The panel says so.</li>
     <li><strong>Some labels are rough.</strong> A home with no unit and no type in the data is treated as a flat. "Grocery" covers any shop filed under supermarket without a chain name. Selective schools come from our own short list, under one label, so check each school's entry rules.</li>

@@ -12,9 +12,28 @@
 
 - [x] 8. Loaded in Chrome and checked on real listings: Domain (1001/2 Sam Sing St, Waterloo) and realestate.com.au (29A Albion St, Surry Hills, showing the exact home, valuation, updated last sale and heritage on the property)
 
+- [x] Holdout score: **8 of 10 correct, 0 wrong homes** (details below)
+
 ## Next
-- [ ] Holdout score ("final score" with the 10 addresses)
 - [ ] Docs, videos, final check and push (when you say the word for each)
+
+## Holdout score (for the report)
+Run once on the live server with `tools/check_matches.py`, with no code changes first, then each result checked against the API's full address list.
+
+| Address | Result | Verdict |
+|---|---|---|
+| C1109/21 Dunkerley Place, Waterloo | pick | Miss. The flat is offered second as 1109/21, but it should be exact: that's the only 1109 in a building with no lettered units |
+| 121/169-175 Phillip Street, Waterloo | exact | Correct |
+| 709/16 Gadigal Avenue, Waterloo | exact | Correct |
+| 11702/5 Sam Sing Street, Waterloo | exact | Correct |
+| 49 Reservoir Street, Surry Hills | exact | Correct |
+| 5/111-115 Foveaux Street, Surry Hills | exact | Correct (the live record, not its retired duplicate) |
+| 901B/24 Point Street, Pyrmont | exact | Correct (not its neighbour 901A) |
+| 103/320 Harris Street, Pyrmont | exact | Correct |
+| 120-122 Lawson Street, Redfern | pick | Miss. The listing and `basics/all` both say house, but the geocoder's "unit" type led the panel to say "Pick your unit" |
+| 107/140 Curlewis Street, Bondi Beach | outside | Correct |
+
+Neither miss showed facts for a wrong home: in both, the right record was on the list to pick.
 
 ## Things the data taught us
 - The geocoder returns at most 10 results, so the suburb property list is used to see a whole building or street.

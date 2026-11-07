@@ -78,3 +78,6 @@ Neither miss showed facts for a wrong home: in both, the right record was on the
 - Price changes are at suburb level, not for one building.
 - Valuations are missing for most flats.
 - Selective schools are a fixed list in our code: the four requested, plus North Sydney Boys and Girls, which also appear in the data.
+- Lettered units stored without the letter (`C1109` as `1109`) are an inference, and the panel says so.
+- A home with no unit and no dwelling type in the data (such as 121 Lawson St, Redfern) is treated as a flat, for its price series and the strata question.
+- An old sale moved by a suburb median can be far from the asking price: 120-122 Lawson St comes out at about $2.94M, against an $8M asking price in the data. The panel marks sales over 10 years old as rough.

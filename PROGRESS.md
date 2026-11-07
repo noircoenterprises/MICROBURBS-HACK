@@ -15,7 +15,8 @@
 - [x] Holdout score: **8 of 10 correct, 0 wrong homes** (details below)
 
 ## Next
-- [ ] Docs, videos, final check and push (when you say the word for each)
+- [x] README.md, report.html, pitch.mp4 and demo.mp4 at the top level
+- [ ] Push, then switch the repo to Public and submit the link
 
 ## Holdout score (for the report)
 Run once on the live server with `tools/check_matches.py`, with no code changes first, then each result checked against the API's full address list.

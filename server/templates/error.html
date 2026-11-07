@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block main %}
+<div class="card mx-auto mt-10 max-w-xl">
+  <h1 class="text-xl font-semibold text-slate-900 dark:text-white">{{ title or "We can't show that property" }}</h1>
+  <p class="mt-3 text-slate-600 dark:text-slate-300">{{ message }}</p>
+  {% if suggestions %}
+  <p class="mt-5 text-sm font-medium text-slate-900 dark:text-white">The address in today's address file:</p>
+  <ul class="mt-2 space-y-1">
+    {% for a in suggestions %}
+    <li><a class="link font-medium" href="{{ report_url(a.id, a.display_name) }}">{{ a.display_name }} →</a>
+      <span class="text-sm text-slate-500 dark:text-slate-400">({{ a.id }})</span></li>
+    {% endfor %}
+  </ul>
+  <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Check it is the same dwelling before relying on it: unit numbers can change too.</p>
+  {% endif %}
+  <p class="mt-6 text-sm text-slate-500 dark:text-slate-400">Or search for another address or suburb above.</p>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "_macros.html" import search_box %}
+{% block header_search %}{% endblock %}{# the hero has the big search box #}
+{% block main %}
+
+<section class="relative isolate -mx-4 -mt-6 overflow-visible px-4 pt-14 pb-12 sm:-mx-6 sm:-mt-8 sm:px-6 sm:pt-24 sm:pb-16">
+  {# soft glow behind the hero #}
+  <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] overflow-hidden">
+    <div class="absolute top-[-140px] left-1/2 h-[420px] w-[820px] -translate-x-1/2 rounded-full bg-gradient-to-r from-sky-400/25 via-sky-400/15 to-indigo-500/25 blur-3xl dark:from-sky-500/20 dark:via-sky-500/10 dark:to-indigo-500/25"></div>
+  </div>
+  <div class="mx-auto max-w-3xl text-center">
+    <span class="chip text-xs">Microburbs Hackathon API · FastAPI + htmx + Tailwind</span>
+    <h1 class="mt-5 text-4xl font-semibold tracking-tight text-balance text-slate-900 sm:text-6xl dark:text-white">
+      Any property in the City of Sydney, <span class="bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent dark:from-sky-300 dark:to-blue-400">on one page.</span>
+    </h1>
+    <p class="mx-auto mt-5 max-w-2xl text-lg text-pretty text-slate-600 dark:text-slate-400">
+      Start typing an address or a suburb. An address opens its report: estimated value and range, value over time,
+      sale history, risks, schools and transport. A suburb opens its market, its people and its recent sales.
+    </p>
+    <div class="mx-auto mt-8 max-w-2xl">{{ search_box(large=True, autofocus=True) }}</div>
+    {% if missed %}
+    <p class="mt-4 text-sm text-rose-600 dark:text-rose-300">Nothing in the City of Sydney matches “{{ missed }}”. Try a street address or one of the suburbs below.</p>
+    {% endif %}
+    <div class="mt-5 flex flex-wrap items-center justify-center gap-2 text-sm">
+      <span class="muted">Try:</span>
+      {% for gnaf, address, kind in examples %}
+      <a href="{{ report_url(gnaf, address) }}" class="chip hover:border-sky-500/50 hover:text-sky-700 dark:hover:text-sky-300">{{ address }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="mx-auto max-w-5xl">
+  <h2 class="card-title text-center">Or browse the {{ suburbs | length }} suburbs</h2>
+  <div class="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+    {% for s in suburbs %}
+    <a href="/suburb/{{ s | urlencode }}"
+       class="group flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-700 transition
+              hover:border-sky-500/50 hover:text-sky-700 dark:border-white/10 dark:bg-white/[0.03] dark:text-slate-300 dark:hover:border-sky-400/40 dark:hover:bg-white/[0.06] dark:hover:text-white">
+      <span class="truncate">{{ s | suburb_label }}</span>
+      <span class="text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-sky-500 dark:text-slate-600">→</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="mx-auto mt-14 grid max-w-5xl gap-4 sm:grid-cols-3">
+  {% for title, text in [
+      ("Value and range", "An automated estimate with its 80% range, the value over time, and every recorded sale."),
+      ("Risks and surroundings", "Flood, heritage, bushfire and power lines; nearby schools with NAPLAN results; trains, buses and shops."),
+      ("The suburb", "Median prices and rents, growth, yield, days on market, population, incomes and who rents."),
+  ] %}
+  <div class="card">
+    <div class="font-semibold text-slate-900 dark:text-white">{{ title }}</div>
+    <p class="mt-1.5 text-sm text-slate-600 dark:text-slate-400">{{ text }}</p>
+  </div>
+  {% endfor %}
+</section>
+{% endblock %}

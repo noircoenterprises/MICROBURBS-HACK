@@ -1,0 +1,23 @@
+{# Table rows of recent sales in a suburb, each linking to its report; ends with a "Show more" row that htmx
+   replaces with the next page. Used by suburb.html and by GET /suburb/{name}/sales. #}
+{% for s in sales %}
+<tr class="hover:bg-slate-50 dark:hover:bg-white/[0.03]">
+  <td><a class="font-medium text-slate-900 hover:text-sky-600 dark:text-white dark:hover:text-sky-300"
+         href="{{ report_url(s.gnaf_pid, s.address ~ ', ' ~ (suburb | suburb_label), sale=True) }}">{{ s.address }}</a></td>
+  <td class="hidden sm:table-cell">{{ s.property_type }}</td>
+  <td class="num hidden sm:table-cell">{{ s.bedrooms | int if s.bedrooms else "–" }}</td>
+  <td class="num font-medium text-slate-900 dark:text-white">{{ s.sold_price | money }}</td>
+  <td class="num whitespace-nowrap">{{ s.sold_date | nice_date }}</td>
+</tr>
+{% endfor %}
+{% if next_offset < total %}
+<tr id="more-sales">
+  <td colspan="5" class="pt-4 text-center">
+    <button type="button" hx-get="/suburb/{{ suburb | urlencode }}/sales?offset={{ next_offset }}" hx-target="#more-sales" hx-swap="outerHTML"
+            class="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/5">
+      Show more <span class="muted">({{ "{:,}".format(total - next_offset) }} left)</span>
+      <span class="htmx-indicator">…</span>
+    </button>
+  </td>
+</tr>
+{% endif %}

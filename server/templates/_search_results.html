@@ -1,0 +1,31 @@
+{# htmx partial: suggestions under the search box. Suburbs first, then addresses. #}
+{% set row = "flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-700 hover:bg-slate-100 data-active:bg-slate-100 dark:text-slate-200 dark:hover:bg-white/5 dark:data-active:bg-white/10" %}
+{% set icon = "grid size-8 shrink-0 place-items-center rounded-lg" %}
+{% if suburbs or addresses %}
+  {% if suburbs %}
+  <div class="px-3 pt-2 pb-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">Suburbs</div>
+  {% for s in suburbs %}
+  <a href="/suburb/{{ s | urlencode }}" class="{{ row }}">
+    <span class="{{ icon }} bg-indigo-500/10 text-indigo-500 dark:text-indigo-300">
+      <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5V4l-6 2.5L9 4Z"/><path d="M9 4v13M15 6.5v13"/></svg>
+    </span>
+    <span class="min-w-0"><span class="block truncate font-medium">{{ s | suburb_label }}</span>
+      <span class="block text-xs text-slate-500 dark:text-slate-400">Suburb · market, people and recent sales</span></span>
+  </a>
+  {% endfor %}
+  {% endif %}
+  {% if addresses %}
+  <div class="px-3 pt-2 pb-1 text-[11px] font-semibold tracking-wider text-slate-400 uppercase">Addresses</div>
+  {% for a in addresses %}
+  <a href="{{ report_url(a.id, a.display_name) }}" class="{{ row }}">
+    <span class="{{ icon }} bg-sky-500/10 text-sky-600 dark:text-sky-300">
+      <svg viewBox="0 0 24 24" class="size-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg>
+    </span>
+    <span class="min-w-0"><span class="block truncate font-medium">{{ a.display_name }}</span>
+      <span class="block text-xs text-slate-500 dark:text-slate-400">{{ (a.property_type or "property") | capitalize }} · property report</span></span>
+  </a>
+  {% endfor %}
+  {% endif %}
+{% else %}
+  <p class="px-3 py-3 text-sm text-slate-500 dark:text-slate-400">No address or suburb in the City of Sydney matches “{{ q }}”.</p>
+{% endif %}

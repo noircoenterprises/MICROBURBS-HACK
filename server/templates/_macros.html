@@ -1,0 +1,63 @@
+{# ---- The one search box: any address or suburb. Suggestions come from GET /search (htmx); Enter goes to /go. ---- #}
+{% macro search_box(large=False, autofocus=False) %}
+<form action="/go" method="get" role="search" data-search class="relative">
+  <svg viewBox="0 0 24 24" class="pointer-events-none absolute top-1/2 -translate-y-1/2 text-slate-400 {{ 'left-5 size-5' if large else 'left-3 size-4' }}"
+       fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+  <input type="search" name="q" autocomplete="off" spellcheck="false" aria-label="Search an address or suburb"
+         placeholder="{{ 'Type an address or a suburb…' if large else 'Search an address or suburb' }}"
+         {% if autofocus %}autofocus{% endif %}
+         hx-get="/search" hx-trigger="input changed delay:200ms, focus" hx-target="next [data-suggest]" hx-sync="this:replace"
+         class="w-full rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm outline-none placeholder:text-slate-400
+                focus:border-sky-500 focus:ring-4 focus:ring-sky-500/15 dark:border-white/10 dark:bg-slate-900 dark:text-white
+                dark:placeholder:text-slate-500 dark:focus:border-sky-400
+                {{ 'py-4 pr-5 pl-13 text-lg' if large else 'py-2 pr-3 pl-9 text-sm' }}">
+  <div data-suggest
+       class="absolute inset-x-0 top-full z-50 mt-2 max-h-[70vh] overflow-auto rounded-xl border border-slate-200 bg-white p-1.5
+              text-left shadow-2xl empty:hidden dark:border-white/10 dark:bg-slate-900"></div>
+</form>
+{% endmacro %}
+
+{# ---- A dependency-free line chart. `c` comes from line_chart() in main.py; one colour class per line. ---- #}
+{% macro chart(c, colours=("text-sky-500 dark:text-sky-400",), id="chart") %}
+{# On phones the chart keeps a readable minimum width and scrolls sideways. #}
+<div class="-mx-1 overflow-x-auto px-1">
+<svg viewBox="0 0 {{ c.width }} {{ c.height }}" width="100%" role="img" class="block min-w-[600px]">
+  {% for t in c.yticks %}
+  <line x1="{{ c.plot_left }}" x2="{{ c.plot_right }}" y1="{{ t.y }}" y2="{{ t.y }}"
+        class="stroke-slate-200 dark:stroke-white/10" {% if not loop.first %}stroke-dasharray="3 4"{% endif %}/>
+  <text x="{{ c.plot_left - 10 }}" y="{{ t.y + 4 }}" text-anchor="end" font-size="11" class="fill-slate-500 dark:fill-slate-400">{{ t.label }}</text>
+  {% endfor %}
+  {% for t in c.xticks %}
+  <text x="{{ t.x }}" y="{{ c.baseline + 20 }}" text-anchor="middle" font-size="11" class="fill-slate-500 dark:fill-slate-400">{{ t.label }}</text>
+  {% endfor %}
+  {% for l in c.lines if l.line %}
+  <g class="{{ colours[loop.index0 % colours | length] }}">
+    {% if loop.first %}
+    {# The gradient lives inside the group so its currentColor is the line's colour. #}
+    <linearGradient id="{{ id }}-fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="currentColor" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="currentColor" stop-opacity="0"/>
+    </linearGradient>
+    <polygon points="{{ l.area }}" fill="url(#{{ id }}-fill)"/>
+    {% endif %}
+    <polyline points="{{ l.line }}" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+  {% endfor %}
+  {% for d in c.dots %}
+  <circle cx="{{ d.x }}" cy="{{ d.y }}" r="5.5" class="fill-rose-500 stroke-white dark:stroke-slate-900" stroke-width="2.5"><title>Sold {{ d.label }}</title></circle>
+  {% endfor %}
+</svg>
+</div>
+{% endmacro %}
+
+{# ---- A legend entry: a coloured dot and a label. ---- #}
+{% macro key(colour, label) %}<span class="inline-flex items-center gap-1.5"><i class="dot {{ colour }}"></i>{{ label }}</span>{% endmacro %}
+
+{# ---- One headline figure. ---- #}
+{% macro stat(k, v, s=None, cls="") %}
+<div class="min-w-0 {{ cls }}">
+  <div class="stat-k">{{ k }}</div>
+  <div class="stat-v">{{ v }}</div>
+  {% if s %}<div class="stat-s">{{ s }}</div>{% endif %}
+</div>
+{% endmacro %}

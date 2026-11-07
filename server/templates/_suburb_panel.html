@@ -1,0 +1,32 @@
+{# htmx partial under a report: the suburb at a glance. `kind` is "house" or "unit", matching the property. #}
+{% from "_macros.html" import chart as draw_chart, stat, key %}
+{% set price = market.median_sale_price or {} %}
+{% set rent = market.median_rent or {} %}
+{% set growth = market.price_growth_5y or {} %}
+{% set yld = market.yield_pct or {} %}
+{% set dom = market.days_on_market or {} %}
+{% set label = "houses" if kind == "house" else "units" %}
+<div class="flex flex-wrap items-baseline justify-between gap-2">
+  <h2 class="text-lg font-semibold text-slate-900 dark:text-white">About {{ suburb | suburb_label }}</h2>
+  <a class="link text-sm" href="/suburb/{{ suburb | urlencode }}">Suburb page and recent sales →</a>
+</div>
+<div class="mt-4 grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3 lg:grid-cols-6">
+  {{ stat("Median house", price.house | money(short=True)) }}
+  {{ stat("Median unit", price.unit | money(short=True)) }}
+  {{ stat("Median rent, " ~ label, (rent[kind] | money) ~ ("/wk" if rent[kind] else "")) }}
+  {{ stat("5-yr growth, " ~ label, growth[kind] | pct(signed=True)) }}
+  {{ stat("Gross yield, " ~ label, yld[kind] | pct) }}
+  {{ stat("Days on market", "%.0f" | format(dom[kind]) if dom[kind] else "–") }}
+  {{ stat("Population", "{:,}".format(hero.population) if hero.population else "–") }}
+  {{ stat("Dwellings", "{:,}".format(hero.dwellings) if hero.dwellings else "–") }}
+  {{ stat("Household income", (median_income | money) ~ ("/yr" if median_income else ""), "Median") }}
+  {{ stat("Renting", "%.0f%%" | format(tenure.renting_pct) if tenure.renting_pct is not none else "–",
+          "Census " ~ tenure.census_year if tenure.census_year else None) }}
+</div>
+{% if chart %}
+<div class="mt-6 flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400">
+  {{ key("bg-indigo-400", "Median " ~ ("house" if kind == "house" else "unit") ~ " price in " ~ (suburb | suburb_label)) }}
+</div>
+<div class="mt-2">{{ draw_chart(chart, colours=("text-indigo-500 dark:text-indigo-400",), id="suburb-panel") }}</div>
+{% endif %}
+{% if price.as_of %}<p class="mt-4 text-xs text-slate-500 dark:text-slate-400">Market figures as at {{ price.as_of | nice_date }}.</p>{% endif %}

@@ -1,0 +1,12 @@
+{# htmx partial: suburb median price history, used when a property has no value series of its own. #}
+{% from "_macros.html" import chart as draw_chart, key %}
+{% if chart %}
+<div class="flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400">
+  {{ key("bg-indigo-400", "Median " ~ kind ~ " price in " ~ (suburb | suburb_label)) }}
+</div>
+<div class="mt-2">{{ draw_chart(chart, colours=("text-indigo-500 dark:text-indigo-400",), id="trend") }}</div>
+<p class="mt-3 text-xs text-slate-500 dark:text-slate-400">There's no modelled value series for {{ "apartments" if kind == "unit" else "this property" }},
+  so this shows the suburb's median {{ kind }} price instead.</p>
+{% else %}
+<p class="muted">No value history for this property or its suburb.</p>
+{% endif %}

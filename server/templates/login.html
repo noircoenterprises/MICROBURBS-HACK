@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Enter your password{% endblock %}
+{% block header_search %}{% endblock %}
+{% block main %}
+<div class="mx-auto max-w-xl pt-14">
+  <h1 class="text-3xl font-semibold text-slate-900 dark:text-white">Enter your password</h1>
+  <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">If you don't have one yet, wait for one to be shared with you.</p>
+  <form method="post" action="/login" class="mt-6 flex gap-2">
+    <input type="hidden" name="next" value="{{ next }}">
+    <input type="password" name="password" required autofocus autocomplete="current-password" placeholder="Password"
+           class="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900 dark:border-white/10 dark:bg-slate-900 dark:text-white">
+    <button type="submit" class="rounded-lg bg-indigo-500 px-4 py-2 font-medium text-white">Enter</button>
+  </form>
+  {% if error %}<p class="mt-3 text-sm text-rose-600 dark:text-rose-400">That password didn't work.</p>{% endif %}
+</div>
+{% endblock %}

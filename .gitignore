@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+*.csv
+*.mov
+__pycache__/
+.venv/
+*.pyc
+node_modules/
+.vercel/
+.DS_Store

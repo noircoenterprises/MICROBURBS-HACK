@@ -35,7 +35,7 @@
 | Public housing (estimated) | 12.0% | 56.0% |
 | Flood, heritage or power lines | 39.5% | 99.5% |
 
-- The all-clear line shows on 0.5% of homes under the current rule, and would show on 30.0% if heritage only counted on the property itself.
+- Because heritage is within 200 m of 99.5% of homes, the panel now shows it only when it's on the property. That takes the all-clear line from 0.5% of homes to 30.0% of this sample. Flood and power lines still count within 200 m.
 - With 200 homes, each percentage could be off by up to about 7 points.
 - Two earlier runs used a shuffle, which changed with the list (the list size varied by 1 or 2 between runs). They gave similar results: heritage on the property 35–36.5% and within 200 m 99%, power lines within 200 m 46–47%, public housing within 200 m 59–61.5%.
 - This run ranks homes by a hash of the seed and address ID, so a small change in the list can't reshuffle the sample. It hasn't been run a second time to confirm it repeats exactly.

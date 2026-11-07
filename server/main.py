@@ -1096,8 +1096,10 @@ def daily_life(r: dict, pois: dict | None) -> dict:
 def flag_rows(layers: dict | None) -> list[dict]:
     """The same reading of the risk layers as summarise_risks(), worded for the panel.
 
-    'applies' marks what the panel shows: on the property or within 200 m. Public housing stays
-    neutral ('info') however close it is, because it's a share of homes in an area, not a hazard.
+    'applies' marks what the panel shows: on the property or within 200 m. Heritage counts only on the
+    property, because some heritage is within 200 m of 99.5% of homes (tools/flag_rates.py), which
+    tells a buyer nothing. Public housing stays neutral ('info') however close it is, because it's a
+    share of homes in an area, not a hazard.
     """
     rows = []
     for key, label in FLAGS.items():
@@ -1108,6 +1110,7 @@ def flag_rows(layers: dict | None) -> list[dict]:
         on_property = [i for i in items if i.get("on_property")]
         nearest = min((i["nearest_distance_m"] for i in items), default=None)
         close = nearest is not None and nearest < NEAR_M
+        counts_when_close = key != "heritage"
 
         if on_property:
             text = f"About {on_property[0].get('value')} of homes in this small area" if key == "public_housing" else "On this property"
@@ -1118,9 +1121,10 @@ def flag_rows(layers: dict | None) -> list[dict]:
         else:
             text = NONE_NEARBY
 
-        level = "high" if on_property else "medium" if close else "low" if nearest is not None else "ok"
+        level = ("high" if on_property else "medium" if close and counts_when_close
+                 else "low" if nearest is not None else "ok")
         rows.append({"key": key, "label": label, "text": text, "level": "info" if key == "public_housing" else level,
-                     "applies": bool(on_property or close)})
+                     "applies": bool(on_property or (close and counts_when_close))})
     return rows
 
 

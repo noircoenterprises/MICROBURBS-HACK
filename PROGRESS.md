@@ -35,6 +35,10 @@ Run once on the live server with `tools/check_matches.py`, with no code changes 
 
 Neither miss showed facts for a wrong home: in both, the right record was on the list to pick.
 
+**The reported score stays 8 of 10.** Both misses were fixed after this run, with general rules, so these 10 addresses no longer count as untested. Rerunning them after the fixes gave 9 exact and 1 outside, but that's only a regression check, not a new score.
+- Lettered units: `C1109` is taken as `1109` only if the number has 3 or more digits, no unit in the building has a letter, and exactly one flat has those digits. The panel shows a note saying so. This is an inference, so it belongs under "What remains uncertain".
+- Whole houses: a range address with one record, which the property data says is a house, is now exact instead of "Pick your unit".
+
 ## Things the data taught us
 - The geocoder returns at most 10 results, so the suburb property list is used to see a whole building or street.
 - The suburb property list still holds retired address IDs (403). `534D/810 Elizabeth St` was re-issued as `534/810`.

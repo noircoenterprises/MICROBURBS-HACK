@@ -722,6 +722,31 @@ def reissued_unit(retired: Record, records: list[Record]) -> Record | None:
     return other if other.addr.unit == digits and is_live(other) else None
 
 
+def unlettered_unit(p: Address, records: list[Record]) -> Record | None:
+    """The flat a lettered unit is stored as when the address data drops the letter: C1109/21 Dunkerley Pl is
+    1109/21. Taken as the same flat only if the number has 3 or more digits (floor and flat, so the letter is
+    likely a block; G2 might not be 2), no unit in the building has a letter, and exactly one has those digits.
+    `records` must include the suburb's full list, or a lettered unit or a second match could be missed.
+    """
+    digits = re.sub(r"\D", "", p.unit or "")
+    if len(digits) < 3 or digits == p.unit:
+        return None
+    building = {r.gnaf_id: r for r in records if same_place(p, r.addr) and r.addr.unit and r.addr.is_home}
+    if any(re.search(r"[A-Z]", r.addr.unit) for r in building.values()):
+        return None
+    same_digits = [r for r in building.values() if r.addr.unit == digits]
+    return same_digits[0] if len(same_digits) == 1 and is_live(same_digits[0]) else None
+
+
+def is_whole_house(p: Address, found: list[Record]) -> bool:
+    """One record for a whole address, like 120-122 Lawson St, that the property data says is a house. The
+    geocoder's type can say "unit" for these, so check before asking the user to pick a unit that isn't there."""
+    if p.unit or not p.suburb_key or len(found) != 1 or found[0].addr.unit or found[0].addr.lo != p.lo:
+        return False
+    basics = call(client().property, found[0].gnaf_id, "basics/all")["data"] or {}
+    return bool(basics.get("dwelling_type")) and home_kind(False, basics) == "house"
+
+
 def unit_order(p: Address, r: Record) -> tuple:
     """Whole-building records first, then the units closest to the one asked for, then in number order."""
     digits = [int(d) for d in re.findall(r"\d+", r.addr.unit or "")[:1]]
@@ -731,6 +756,8 @@ def unit_order(p: Address, r: Record) -> tuple:
 
 
 def answer(p: Address, kind: str, found: list[Record], message: str = "") -> dict:
+    if kind == "pick" and is_whole_house(p, found):
+        kind = "exact"
     if kind == "exact":
         return {"match": "exact", "address": pretty(found[0].addr), "gnaf_id": found[0].gnaf_id,
                 "has_unit": bool(found[0].addr.unit), **({"note": message} if message else {})}
@@ -788,6 +815,9 @@ def match_address(text: str) -> dict:
         records = [r for r in records if r.gnaf_id != found[0].gnaf_id]
     if kind == "exact":
         return answer(p, kind, found)
+    same_flat = unlettered_unit(p, records)
+    if same_flat:
+        return answer(p, "exact", [same_flat], f"Listed as {p.unit}. The address data calls it {same_flat.addr.unit}.")
     found = live_only(p, found)
     if found:
         return answer(p, "pick", found)

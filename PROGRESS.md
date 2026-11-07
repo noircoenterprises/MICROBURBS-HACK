@@ -7,10 +7,12 @@
 - [x] 4. Daily life, flags, street rank, ask the agent, full report link
 - [x] 5. `tools/dev_addresses.txt` and `tools/check_matches.py`: 10 of 10 behave as expected
 
+- [x] 6. Live at https://noir-microburbs.vercel.app (10 of 10 there too); the key is a Vercel secret
+- [x] 7. Chrome extension built in `/extension`; tested on a local copy of a listing page
+
 ## Next
-- [ ] 6. Deploy to Vercel and test `/lookup` there
-- [ ] 7. Build the Chrome extension
-- [ ] 8. Fix problems reported from real listings
+- [ ] 8. Load it in Chrome and fix problems reported from real listings
+- [ ] Docs, videos, final check and push (when you say the word for each)
 
 ## Things the data taught us
 - The geocoder returns at most 10 results, so the suburb property list is used to see a whole building or street.

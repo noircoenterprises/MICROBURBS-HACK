@@ -621,6 +621,8 @@ def classify(p: Address, records: list[Record]) -> tuple[str | None, list[Record
         is_range = p.hi is not None or one.addr.hi is not None
         if (one.kind == "unit" and is_range) or not p.suburb_key:
             return "pick", whole  # 23-47 Flinders St: a record for a whole building, not one flat
+        if one.addr.lo != p.lo:
+            return "pick", whole  # "10-12 Foo St" and a record for 12 Foo St could be two different homes
         return "exact", whole
     return ("pick", whole) if whole else (None, [])
 
@@ -943,8 +945,7 @@ def nearest_school(schools: list[dict], kind: str):
         matching = [s for s in schools if "college" in school_kinds(s) and s.get("distance_m") is not None]
     if not matching:
         return NO_DATA
-    # The nearest with NAPLAN results, if any: that skips small special-purpose colleges with nothing to compare.
-    s = min([s for s in matching if s.get("naplan_label")] or matching, key=lambda s: s["distance_m"])
+    s = min(matching, key=lambda s: s["distance_m"])
     return place(s["name"], s["distance_m"], naplan=or_no_data(s.get("naplan_label")), sector=or_no_data(s.get("sector")))
 
 

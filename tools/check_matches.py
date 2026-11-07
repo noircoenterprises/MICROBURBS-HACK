@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Run /lookup on a file of addresses and print a table of how each one matched.
 
-    python3 tools/check_matches.py tools/dev_addresses.txt
-    python3 tools/check_matches.py tools/holdout_addresses.txt https://your-server.vercel.app
+    server/.venv/bin/python tools/check_matches.py tools/dev_addresses.txt
+    server/.venv/bin/python tools/check_matches.py tools/holdout_addresses.txt https://noir-microburbs.vercel.app
 
 Each line of the file is an address, optionally followed by "|" and a listing link.
 """
 
 import json
+import ssl
 import sys
 import time
 import urllib.parse
@@ -28,10 +29,19 @@ EXPECTED = {
 }
 
 
+def tls_context():
+    """The python.org build of Python on a Mac has no certificates of its own, so use certifi's if it's there."""
+    try:
+        import certifi
+        return ssl.create_default_context(cafile=certifi.where())
+    except ImportError:
+        return ssl.create_default_context()
+
+
 def lookup(server, address):
     url = f"{server.rstrip('/')}/lookup?{urllib.parse.urlencode({'address': address})}"
     started = time.monotonic()
-    with urllib.request.urlopen(url, timeout=60) as resp:
+    with urllib.request.urlopen(url, timeout=60, context=tls_context()) as resp:
         body = json.load(resp)
     return body, time.monotonic() - started
 

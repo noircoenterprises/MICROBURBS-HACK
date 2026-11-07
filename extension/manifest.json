@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Microburbs Facts for Property Listings",
+  "version": "1.0.0",
+  "description": "Shows Microburbs facts beside the listing you're viewing on realestate.com.au and domain.com.au.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "https://noir-microburbs.vercel.app/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.realestate.com.au/*",
+        "https://www.domain.com.au/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
